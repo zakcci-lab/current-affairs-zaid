@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>करेंट अफेयर्स बाय ज़ैद | UPPSC एवं राज्य सिविल सेवा</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: 'Noto Sans Devanagari', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-slate-900 text-white border-b border-amber-600/40 sticky top-0 z-50 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-amber-500 text-slate-950 font-black text-xl flex items-center justify-center shadow">
+          ज़ै
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white">करेंट अफेयर्स <span class="text-amber-400">बाय ज़ैद</span></h1>
+          <p class="text-xs text-slate-400">UPPSC, BPSC एवं राज्य सिविल सेवा विशेषांक</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span id="live-date" class="bg-slate-800 text-amber-300 text-xs px-3 py-1.5 rounded-full border border-slate-700 font-semibold">
+          लोड हो रहा है...
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white py-8 border-b border-slate-700">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+      <span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+        दैनिक प्रीलिम्स तथ्य + मुख्य परीक्षा दृष्टि (Paper 1-6)
+      </span>
+      <h2 class="text-2xl md:text-3xl font-extrabold mb-2">लोक सेवा आयोग समसामयिक विशेषांक</h2>
+      <p class="text-slate-300 text-sm max-w-2xl mx-auto">
+        पीआईबी (PIB), दैनिक जागरण एवं आधिकारिक स्रोतों से विश्लेषित प्रामाणिक अध्ययन सामग्री।
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left: Daily Articles (2 Cols) -->
+    <section class="lg:col-span-2 space-y-6">
+      <div class="flex items-center justify-between border-b pb-3 border-slate-200">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center">
+          <i class="fa-solid fa-newspaper text-amber-500 mr-2"></i> आज के प्रमुख समसामयिक विषय
+        </h3>
+        <span class="text-xs text-slate-500 font-medium">दैनिक विश्लेषण</span>
+      </div>
+
+      <div id="articles-container" class="space-y-6">
+        <div class="p-8 text-center text-slate-500 bg-white rounded-xl shadow-sm border border-slate-200">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-500 mb-2"></i>
+          <p>ताज़ा समसामयिकी लोड हो रही है...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: UPPSC Daily Mock Quiz (1 Col) -->
+    <section class="space-y-6">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 sticky top-20">
+        <div class="border-b pb-3 mb-4 border-slate-100 flex items-center justify-between">
+          <h3 class="text-base font-bold text-slate-900 flex items-center">
+            <i class="fa-solid fa-list-check text-indigo-600 mr-2"></i> दैनिक 5 अभ्यास प्रश्न (MCQs)
+          </h3>
+          <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">-0.33 नेगेटिव</span>
+        </div>
+
+        <div id="quiz-container" class="space-y-6">
+          <div class="text-center py-6 text-slate-400 text-sm">
+            क्विज़ लोड हो रहा है...
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
+    <p>© करेंट अफेयर्स बाय ज़ैद (Current Affairs by Zaid). सर्वाधिकार सुरक्षित।</p>
+    <p class="mt-1 text-slate-500">राज्य सिविल सेवा (UPPSC / BPSC) परीक्षा की समर्पित तैयारी के लिए विशेष रूप से निर्मित।</p>
+  </footer>
+
+  <script>
+    async function initApp() {
+      const artContainer = document.getElementById('articles-container');
+      const quizContainer = document.getElementById('quiz-container');
+      const dateEl = document.getElementById('live-date');
+
+      try {
+        const res = await fetch('./data/daily.json?t=' + new Date().getTime());
+        if (!res.ok) throw new Error('Data file not reachable');
+        const data = await res.json();
+
+        // 1. Date
+        dateEl.innerText = data.date || 'आज का अंक';
+
+        // 2. Render Articles
+        artContainer.innerHTML = '';
+        data.articles.forEach(art => {
+          const card = document.createElement('article');
+          card.className = "bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4 hover:border-amber-400 transition";
+          card.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-md border border-indigo-100">
+                ${art.gs_paper}
+              </span>
+              <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                ${art.category}
+              </span>
+            </div>
+            <h4 class="text-lg font-bold text-slate-900 leading-snug">${art.title}</h4>
+            <p class="text-sm text-slate-600 leading-relaxed">${art.summary}</p>
+            
+            <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-2">
+              <span class="text-xs font-bold text-slate-800 flex items-center">
+                <i class="fa-solid fa-bullseye text-red-500 mr-1.5"></i> प्रीलिम्स हेतु मुख्य तथ्य:
+              </span>
+              <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside">
+                ${art.prelims_points.map(pt => `<li>${pt}</li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="text-xs bg-amber-50/70 p-3 rounded-lg border border-amber-200/60 text-slate-700">
+              <strong class="text-amber-900 font-bold">मुख्य परीक्षा दृष्टि:</strong> ${art.mains_angle}
+            </div>
+          `;
+          artContainer.appendChild(card);
+        });
+
+        // 3. Render MCQs
+        quizContainer.innerHTML = '';
+        data.mcqs.forEach((mcq, idx) => {
+          const item = document.createElement('div');
+          item.className = "p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-3";
+          item.innerHTML = `
+            <p class="text-xs font-bold text-slate-800 leading-relaxed">
+              <span class="text-indigo-600 font-extrabold">Q${idx+1}.</span> ${mcq.question}
+            </p>
+            <div class="space-y-1.5" id="opt-box-${idx}">
+              ${mcq.options.map((opt, oIdx) => `
+                <button onclick="checkAnswer(${idx}, ${oIdx}, ${mcq.correct})" 
+                  id="btn-${idx}-${oIdx}"
+                  class="w-full text-left text-xs p-2 rounded bg-white border border-slate-200 hover:bg-slate-100 font-medium transition flex items-center">
+                  <span class="w-5 h-5 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mr-2 text-[10px] font-bold">
+                    ${String.fromCharCode(65 + oIdx)}
+                  </span>
+                  ${opt}
+                </button>
+              `).join('')}
+            </div>
+            <div id="exp-${idx}" class="hidden text-xs bg-emerald-50 text-emerald-900 p-2.5 rounded border border-emerald-200 mt-2">
+              <strong>व्याख्या:</strong> ${mcq.explanation}
+            </div>
+          `;
+          quizContainer.appendChild(item);
+        });
+
+      } catch (err) {
+        artContainer.innerHTML = `
+          <div class="p-6 text-center bg-amber-50 border border-amber-200 rounded-xl text-amber-800">
+            <p class="font-bold">डेटा लोड नहीं हो पाया</p>
+            <p class="text-xs mt-1">सुनिश्चित करें कि GitHub Actions चल चुका है और <code>data/daily.json</code> फ़ाइल मौजूद है।</p>
+          </div>
+        `;
+      }
+    }
+
+    function checkAnswer(qIdx, selected, correct) {
+      const parent = document.getElementById(`opt-box-${qIdx}`);
+      const buttons = parent.querySelectorAll('button');
+      buttons.forEach(btn => btn.disabled = true);
+
+      if (selected === correct) {
+        buttons[selected].classList.add('!bg-emerald-100', '!border-emerald-500', '!text-emerald-900');
+      } else {
+        buttons[selected].classList.add('!bg-rose-100', '!border-rose-500', '!text-rose-900');
+        buttons[correct].classList.add('!bg-emerald-100', '!border-emerald-500', '!text-emerald-900');
+      }
+
+      document.getElementById(`exp-${qIdx}`).classList.remove('hidden');
+    }
+
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
