@@ -1,0 +1,90 @@
+import os
+import json
+import feedparser
+from datetime import datetime
+from google import genai
+from google.genai import types
+
+# 1. PIB RSS फ़ीड्स
+RSS_FEEDS = [
+    "https://pib.gov.in/RssMain.aspx?ModId=6&LangId=2",  # PIB Hindi
+    "https://pib.gov.in/RssMain.aspx?ModId=6&LangId=1"   # PIB English
+]
+
+headlines = []
+for url in RSS_FEEDS:
+    try:
+        feed = feedparser.parse(url)
+        for entry in feed.entries[:6]:
+            headlines.append(f"Title: {entry.title}\nSummary: {getattr(entry, 'summary', '')}")
+    except Exception as e:
+        print(f"Error reading feed {url}: {e}")
+
+news_context = "\n---\n".join(headlines[:10])
+
+# 2. Gemini 2.5 Flash API कॉल
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+
+prompt = f"""
+आप UPPSC एवं राज्य सिविल सेवा परीक्षा के वरिष्ठ विशेषज्ञ विश्लेषक हैं।
+निम्नलिखित ताज़ा राष्ट्रीय/अंतर्राष्ट्रीय/यूपी विशेष समाचारों के आधार पर आज के 'करेंट अफेयर्स बाय ज़ैद' के लिए दैनिक सामग्री विशुद्ध मानक हिंदी में तैयार करें:
+
+समाचार संदर्भ:
+{news_context}
+
+निर्देश:
+1. कुल 4 प्रमुख समसामयिक विषय (Articles) तैयार करें (UP Special, GS Paper 1 से 6 के अनुरूप)।
+2. प्रत्येक आर्टिकल में:
+   - id: 1, 2, 3...
+   - title: सटीक हिंदी शीर्षक
+   - gs_paper: जैसे 'GS Paper 2', 'GS Paper 3', या 'GS Paper 5 (UP Special)'
+   - category: 'उत्तर प्रदेश विशेष', 'राष्ट्रीय', 'अर्थव्यवस्था', या 'पर्यावरण'
+   - summary: 2-3 वाक्यों में सार
+   - prelims_points: 3 प्रामाणिक बुलेट पॉइंट्स (तथ्य, वर्ष, मंत्रालय, अनुच्छेद, स्थान आदि)
+   - mains_angle: 1-2 पंक्तियों में मुख्य परीक्षा का विश्लेषण
+3. कुल 5 UPPSC स्तर के बहुविकल्पीय प्रश्न (MCQs) बनाएँ (कथन-कारण या कूट 1 एवं 2 आधारित):
+   - id: 1 से 5
+   - question: प्रश्न का विस्तृत विवरण
+   - options: 4 विकल्प (A, B, C, D)
+   - correct: सही विकल्प का इंडेक्स (0, 1, 2, या 3)
+   - explanation: 2-3 पंक्तियों में विस्तृत हिंदी व्याख्या
+
+उत्तर सिर्फ और सिर्फ शुद्ध JSON में दें:
+{{
+  "date": "{datetime.now().strftime('%d %B %Y')}",
+  "articles": [
+    {{
+      "id": 1,
+      "title": "...",
+      "gs_paper": "GS Paper ...",
+      "category": "...",
+      "summary": "...",
+      "prelims_points": ["...", "...", "..."],
+      "mains_angle": "..."
+    }}
+  ],
+  "mcqs": [
+    {{
+      "id": 1,
+      "question": "...",
+      "options": ["...", "...", "...", "..."],
+      "correct": 0,
+      "explanation": "..."
+    }}
+  ]
+}}
+"""
+
+response = client.models.generate_content(
+    model='gemini-2.5-flash',
+    contents=prompt,
+    config=types.GenerateContentConfig(
+        response_mime_type="application/json"
+    )
+)
+
+os.makedirs("data", exist_ok=True)
+with open("data/daily.json", "w", encoding="utf-8") as f:
+    f.write(response.text)
+
+print("Daily Current Affairs JSON updated successfully!")
