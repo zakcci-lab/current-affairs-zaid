@@ -1,0 +1,39 @@
+name: Daily Current Affairs Automation
+
+on:
+  schedule:
+    # 00:30 UTC = रोज़ सुबह 06:00 AM IST
+    - cron: '30 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-updater:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Scrape & Generate with Gemini AI
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python updater.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "Current Affairs Zaid Bot"
+          git config --global user.email "bot@currentaffairszaid.local"
+          git add data/daily.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update daily current affairs [$(date +'%Y-%m-%d')]" && git push)
